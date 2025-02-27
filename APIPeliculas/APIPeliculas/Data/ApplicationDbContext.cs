@@ -12,5 +12,7 @@ namespace APIPeliculas.Data
         }
         //pasamos aqui todos los modelos que queremos en la BBDD
         public DbSet<Categoria> Categorias { get; set; }
+        public DbSet<Pelicula> Peliculas { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
     }
 }
