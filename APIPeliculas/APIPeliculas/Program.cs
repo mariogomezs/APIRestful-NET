@@ -1,4 +1,7 @@
 using APIPeliculas.Data;
+using APIPeliculas.PeliculasMapper;
+using APIPeliculas.Repositorio;
+using APIPeliculas.Repositorio.IRepositorio;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +13,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+//Agregamos los repositorios
+builder.Services.AddScoped<ICategoria, CategoriaRepository>();
+builder.Services.AddScoped<IPelicula, PeliculaRepository>();
+//AgregamosAutomapper
+builder.Services.AddAutoMapper(typeof(PeliculasMapper));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
