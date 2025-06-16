@@ -1,15 +1,18 @@
 ﻿using APIPeliculas.Modelos;
 using APIPeliculas.Modelos.DTO;
 using APIPeliculas.Repositorio.IRepositorio;
+using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
 
 namespace APIPeliculas.Controllers
 {
-    [Route("api/peliculas")]
+    [Route("api/v{version:apiVersion}/peliculas")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class PeliculasController : ControllerBase
     {
         //Necesitamos acceder al repositorio de Categorias que esta en repository, donde esta toda la logica, por eso ponemos la interfaz
@@ -21,6 +24,7 @@ namespace APIPeliculas.Controllers
             this.repoPelicula = repoPelicula;
             this.mapper = mapper;
         }
+        [AllowAnonymous]
         //Decimos de que tipo sera el metodo
         [HttpGet]
         //Posibles Respuestas que puede dar
@@ -37,6 +41,8 @@ namespace APIPeliculas.Controllers
             }
             return Ok(listaPeliculasDTO);
         }
+       
+        [AllowAnonymous]
         [HttpGet("{id:int}", Name = "GetPelicula")]
         //Posibles Respuestas que puede dar
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -55,7 +61,7 @@ namespace APIPeliculas.Controllers
 
             return Ok(itemPelicula);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(201,Type=typeof(PeliculaDTO))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -90,6 +96,7 @@ namespace APIPeliculas.Controllers
             return CreatedAtRoute("GetPelicula", new { id = peliculaMapper.Id }, peliculaMapper);
         }
         //Patch sirve para actualizar pero solo un atributo, por ejemplo actualizar el nombre, para todo seria el verbo PUT
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id:int}", Name = "ActualizarPatchPelicula")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -124,6 +131,7 @@ namespace APIPeliculas.Controllers
         }
 
         //Patch sirve para actualizar pero solo un atributo, por ejemplo actualizar el nombre, para todo seria el verbo PUT
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}", Name = "borrarPelicula")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -144,6 +152,7 @@ namespace APIPeliculas.Controllers
             }
             return NoContent();
         }
+        [AllowAnonymous]
         [HttpGet("GetPeliculasEnCategorias/{id:int}")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -163,6 +172,7 @@ namespace APIPeliculas.Controllers
             }
             return Ok(itemPelicula);
         }
+        [AllowAnonymous]
         [HttpGet("Buscar")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

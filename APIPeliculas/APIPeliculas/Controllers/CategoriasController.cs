@@ -1,15 +1,21 @@
 ﻿using APIPeliculas.Modelos;
 using APIPeliculas.Modelos.DTO;
 using APIPeliculas.Repositorio.IRepositorio;
+using Asp.Versioning;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.ObjectModel;
 
 namespace APIPeliculas.Controllers
 {
-    [Route("api/categorias")]
+    //Cache 20 segundos duracion( Tambien se puede hacer con los metodos
+    [ResponseCache(Duration = 20)]
+    [Route("api/v{version:apiVersion}/categorias")]
     [ApiController]
+    [ApiVersion("1.0")]
     public class CategoriasController : ControllerBase
     {
         //Necesitamos acceder al repositorio de Categorias que esta en repository, donde esta toda la logica, por eso ponemos la interfaz
@@ -23,9 +29,14 @@ namespace APIPeliculas.Controllers
         }
         //Decimos de que tipo sera el metodo
         [HttpGet]
+        [MapToApiVersion("1.0")]
+        [ResponseCache(CacheProfileName = "PorDefecto30Segundos")]
+        //SI no quisieramos guardar en cache: [ResponseCache(Location=ResponseCacheLocation.None, NoStore=true)]
         //Posibles Respuestas que puede dar
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        //Probando el uso de CORS, hay que poner el nombre que pusimos en el Program(Tambien se podria poner en el controlador
+        [EnableCors("PoliticaCors")]
         public IActionResult GetCategorias()
         {
          var listaCategorias=   repoCategoria.GetCategorias();
@@ -37,7 +48,7 @@ namespace APIPeliculas.Controllers
             }
             return Ok(listaCategoriasDTO);
         }
-       
+
         [HttpGet("{id:int}",Name ="GetCategoria")]
         //Posibles Respuestas que puede dar
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -56,6 +67,7 @@ namespace APIPeliculas.Controllers
 
             return Ok(itemcategoria);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -89,6 +101,7 @@ namespace APIPeliculas.Controllers
             return CreatedAtRoute("GetCategoria", new {id=categoriaMapper.Id},categoriaMapper);
         }
         //Patch sirve para actualizar pero solo un atributo, por ejemplo actualizar el nombre, para todo seria el verbo PUT
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id:int}", Name = "ActualizarPatchCategoria")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -122,6 +135,7 @@ namespace APIPeliculas.Controllers
             return NoContent();
         }
         //Patch sirve para actualizar pero solo un atributo, por ejemplo actualizar el nombre, para todo seria el verbo PUT
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}", Name = "ActualizarPutCategoria")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -156,6 +170,7 @@ namespace APIPeliculas.Controllers
             return NoContent();
         }
         //Patch sirve para actualizar pero solo un atributo, por ejemplo actualizar el nombre, para todo seria el verbo PUT
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}", Name = "borrarCategoria")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
